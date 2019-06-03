@@ -2,7 +2,7 @@
 
 wine_ratings <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-28/winemag-data-130k-v2.csv")
 
-#Loading the packages
+#Loading the required packages
 
 library(tidyverse)
 library(tidytext)
@@ -11,32 +11,27 @@ library(gganimate)
 library(gridExtra)
 library(magick)
 
+#Structure of the data
+
 str(wine_ratings)
 summary(wine_ratings)
 
+#The first column contains serial numbers
+#This is irrelevant to the goal of my analysis
+#Hence, omit it...
+
 wine_ratings<- wine_ratings[ , -1]
 
-summary(wine_ratings)
+#attaching the data set
+
 attach(wine_ratings)
+
+#Are there missing values?
 
 sum(is.na(wine_ratings))
 #204752 missing values
 
-
-#SUMMARY
-#variable	class	description
-#country	character	Country of origin
-#description	character	Flavors and taste profile as written by reviewer
-#designation	character	The vineyard within the winery where the grapes that made the wine are from
-#points	double	The number of points WineEnthusiast rated the wine on a scale of 1-100 (though they say they only post reviews for wines that score >=80)
-#price	double	The cost for a bottle of the wine
-#province	character	The province or state that the wine is from
-#region_1	character	The wine growing area in a province or state (ie Napa)
-#taster_name	character	The taster/reviewer
-#title	character	The title of the wine review, which often contains the vintage (year)
-#variety	character	Grape type
-#winery	character	The winery that made the wine
-
+#I see this is a large data set, thus, i choose to omit the missing values
 
 wine_no_missing <- wine_ratings %>% 
   drop_na(points, price)
@@ -54,7 +49,7 @@ select_wine <- wine_no_missing %>%
   filter(variety %in% best_10_varieties ) %>% 
   select(country, description, points, price, variety)
 
-##Looking for most common words
+##Looking for the most common words in the top 10 wine grape varieties
 
 wine_words <- select_wine %>% 
     unnest_tokens(output = word, input = description) 
@@ -77,6 +72,8 @@ wine_word_counts <- wine_words  %>%
                      "fruit", "palate", "cherry", "oak", "black", "tannins", "ripe",
                      "red", "rich", "plum", "vanilla", "soft", "light", "apple", 
                      "blackberry", "fresh", "berry", "crisp", "dark", "green" ))
+
+#The plot below is an overall plot of the top 10 description words for the top 10 grape varieties
 #Plotting counts
 
 wine_word_counts <- wine_word_counts %>%
@@ -94,7 +91,8 @@ ggplot(wine_word_counts, aes(word, n)) +
         axis.title.y = element_text(face = "bold", color = "darkblue",
                                     size = 12)) 
 
-###Filtering by the top 5 best grape varieties
+###Filtering by the top 3 best grape varieties
+# 1. Cabernet Sauvignon Grape Variety
 
 Cabernet_Sauvignon <- wine_words %>%
   filter(variety == "Cabernet Sauvignon")
@@ -108,6 +106,7 @@ Cabernet_Sauvignon_word_counts <- Cabernet_Sauvignon %>%
 Cabernet_Sauvignon_word_counts <- Cabernet_Sauvignon_word_counts  %>%
   filter(word %in% c("black", "tannins", "fruit",
                      "cherry", "finish", "oak", "blackberry", "palate", "cassis", "chocolate"))
+
 #Plotting Cabernet_Sauvignon_word_counts
 
 Cabernet_Sauvignon_word_counts <- Cabernet_Sauvignon_word_counts %>%
@@ -128,7 +127,7 @@ Cabernet_Sauvignon_plot <- ggplot(Cabernet_Sauvignon_word_counts, aes(word, n)) 
 
 Cabernet_Sauvignon_plot
 
-## Merlot
+# 2. Merlot Grape Variety
 
 Merlot <- wine_words %>%
   filter(variety == "Merlot")
@@ -142,7 +141,8 @@ Merlot_word_counts <- Merlot %>%
 Merlot_word_counts <- Merlot_word_counts %>%
   filter(word %in% c("fruit",
                      "cherry", "tannins", "black", "finish", "red", "plum", "palate", "soft", "spice"))
-#Plotting Cabernet_Sauvignon_word_counts
+
+#Plotting Merlot_word_counts
 
 Merlot_word_counts <- Merlot_word_counts  %>%
   mutate(word = reorder(word, n))
@@ -162,8 +162,8 @@ Merlot_plot <- ggplot(Merlot_word_counts, aes(word, n)) +
 
 Merlot_plot
 
-##Third best
-#Pinot Noir
+
+# 3. Pinot Noir
 
 Pinot_Noir <- wine_words %>%
   filter(variety == "Pinot Noir")
@@ -178,7 +178,8 @@ Pinot_Noir_word_counts <- Pinot_Noir_word_counts %>%
   filter(word %in% c("fruit",
                      "cherry", "acidity", "red", "tannins", "finish", 
                      "black", "palate", "raspberry", "ripe"))
-#Plotting Cabernet_Sauvignon_word_counts
+
+#Plotting Pinot Noir_word_counts
 
 Pinot_Noir_word_counts<- Pinot_Noir_word_counts  %>%
   mutate(word = reorder(word, n))
